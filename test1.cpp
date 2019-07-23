@@ -1,4 +1,4 @@
-//括号匹配
+////括号匹配
 class parenthesis {
 public:
 	bool chkparenthesis(string a, int n) {
