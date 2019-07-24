@@ -13,7 +13,7 @@ struct ListNode {
 
 template<class T,class Ref,class Ptr>
 class ListIterator {
-	typedef ListNode<T>* PNode;//½á¹¹ÌåÀàĞÍÖØ¶¨Òå£¬½áµãµÄÀàĞÍ
+	typedef ListNode<T>* PNode;//ç»“æ„ä½“ç±»å‹é‡å®šä¹‰ï¼Œç»“ç‚¹çš„ç±»å‹
 	typedef ListIterator<T, Ref, Ptr> Self;
 public:
 	ListIterator(PNode pNode = nullptr)
@@ -64,7 +64,7 @@ class List {
 		_head->_prev = _head;
 		_head->_data = _head;
 	}
-	//ÕâÀïÒªÊµÏÖÉî¿½±´
+	//è¿™é‡Œè¦å®ç°æ·±æ‹·è´
 	List(const List<T>& lst)
 		:_head(lst._head)
 	{
@@ -79,7 +79,7 @@ class List {
 	}
 	List<T>& operator=(const List<T> lst)
 	{
-		swap(_head, lst._head);//ÄÚ²¿µ÷ÓÃ¿½±´¹¹Ôì
+		swap(_head, lst._head);//å†…éƒ¨è°ƒç”¨æ‹·è´æ„é€ 
 		return *this;
 	}
 	void clear()
