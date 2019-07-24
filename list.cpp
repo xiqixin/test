@@ -130,6 +130,7 @@ class List {
 			delete cur;
 		}
 	}
+	//头删
 	void PopFront()
 	{
 		if (_head->_next != _head)
