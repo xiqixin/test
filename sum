@@ -1,0 +1,19 @@
+//求加法（不能使用四则运算符）
+class UnusualAdd {
+public:
+	int addAB(int A, int B) {
+		// write code here
+		int tmp1, tmp2, ta, tb;
+		tmp1 = A & B;
+		tmp2 = A ^ B;
+		while (tmp1 != 0)
+		{
+			ta = tmp2;
+			tb = tmp1 << 1;
+			tmp1 = ta & tb;
+			tmp2 = ta ^ tb;
+		}
+		return tmp2;
+		//return A+B;
+	}
+};
