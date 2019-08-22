@@ -1,0 +1,25 @@
+//求最近的祖先节点
+class LCA {
+public:
+	int getLCA(int a, int b) {
+		// write code here
+		while (a != b)
+		{
+			if (a > b)
+				a /= 2;
+			else
+				b /= 2;
+		}
+		return a;
+	}
+};
+
+int main()
+{
+	vector<int> v;
+	LCA l;
+	int ret=l.getLCA(5, 2);
+	cout << ret<<endl;;
+	system("pause");
+	return 0;
+}
