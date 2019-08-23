@@ -1,0 +1,196 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+void test1()
+{
+	//malloc和free
+	// void* malloc(size_t size);
+	//如果开辟成功，则返回一个指向开辟好的空间的指针
+	//如果开辟失败，则返回一个NULL指针，故malloc的返回值要做检查
+	// void free(void* ptr)
+	//如果ptr指向的空间不是动态开辟的，那么free函数的性为就是未定义的
+	//如果ptr是NULL指针，则函数什么事都不做
+	int arr[1024] = { 0 };
+	int* ptr = NULL;
+	ptr = (int*)malloc(sizeof(int) * 1024);
+	assert(ptr != NULL);
+	free(ptr);
+	ptr = NULL;//这一步是为了防止出现野指针
+}
+void test2()
+{
+	// void* calloc(size_t num,szie_t szie);
+	//函数的功能是num个大小维size的元素开辟一块空间，并
+	//且把每一个字节初始化为0
+	int* p = calloc(10, sizeof(int));
+	if (p != NULL)
+	{
+	   //使用空间
+		*p = 123;
+	}
+	free(p);
+	p = NULL;
+}
+void test3()
+{
+	// void* realloc(void* ptr,szie_t size)
+	//ptr  是要调整的内存地址
+	//size 调整之后的新大小
+	//这个函数在原函数空间大小的基础上，还会将原来内存的数据移动到新空间
+	//realloc在调整内存的时候，有两种情况
+	//1.原有空间后边有足够大的空间，扩展时直接追加
+	//原有空间后边没有足够大的空间，这时候就是在堆上找
+	//一块连续的空间，函数返回新的内存地址
+	int* ptr = malloc(100 * sizeof(int));
+	if (ptr != NULL)
+	{
+		//业务处理
+	}
+	else {
+		exit(EXIT_FAILURE);
+	}
+	//扩展容量
+	//方法一
+	ptr = realloc(ptr, 1000);
+
+	//方法二
+	int* p = NULL;
+	p = realloc(ptr, 1000);
+	if (p != NULL)
+	{
+		ptr = p;
+	}
+	//业务处理
+	free(ptr);
+	ptr = NULL;
+}
+void test4()
+{
+	// .  当前目录
+	// .. 上一级目录
+	//fp 这类对象叫句柄
+	//FILE* fp = fopen("./test.txt", "r");//按只读方式打开
+	//FILE* fp = fopen("./test.txt", "w");//按w只写方式打开，会先清空文件
+	FILE* fp = fopen("./test.txt", "a");//在文件末尾追加写
+	if (fp == NULL)
+	{
+		printf("fopen failed\n");
+	}
+	else {
+		printf("fopen ok!\n");
+	}
+	//对文件进行操作
+	//fread 读文件
+	// size_t fread( void* ptr ,size_t size,size_t count,FILE* stream);
+	//读取count个大小为size的元素
+	//返回值：返回真实读到的个数
+	char buf[1024] ="aaaaa";
+	fwrite(buf, 1, strlen(buf), fp);
+	/*size_t size= fread(buf, 1, 10, fp);
+	printf("%s\n", buf);
+	printf("%u\n", size);//10 */
+	//关闭文件
+	//如果频繁进行文件打开，又没有关闭
+	//叫做“文件描述符泄露”
+	fclose(fp);
+}
+void test5()
+{
+	/*int arr[3][2] = { 1,2,3,4,5,6 };
+	int(*p)[3] = arr;
+	printf("%d\n", arr);
+	printf("%d\n", &arr);
+	printf("%d\n", p );
+	printf("%d\n", p + 1);
+	printf("%d\n", *(p + 1));
+	printf("%d\n", *(*(p + 1)));*/
+	int arr[10] = { 1,2,3,4,5,6,7,8,9,10 };
+	printf("%p\n", arr); 
+	printf("%d\n", *arr+1);
+	printf("%d\n", arr[0] + 1);
+	printf("%d\n", *(arr + 1));
+	printf("%d\n", *arr);
+	printf("%p\n", &arr);
+	printf("%p\n", &arr+1);
+	printf("%d\n", (&arr+1)-(&arr));
+	//printf("%d\n", &(arr+1));
+}
+void test6()
+{
+	//stdin , FILE* ->标准输入
+	//stdout , FILE* ->标准输出
+	//键盘，显示器，一切皆文件的思想
+	FILE* fp = fopen("../test.txt", "w");
+	if (fp == NULL)
+	{
+		printf("test.txt fopen failed!\n");
+		return;
+	}
+	////////////////////////////////////////////
+   // fgets 和 fputs 的使用
+	//char buf[1024] = { 0 };
+	////fgets 如果返回空指针，说明读到了EOF
+	//while (fgets(buf, sizeof(buf), stdin) != NULL)
+	//{
+	//	fputs(buf, stdout);
+	//	fputs(buf, fp);
+	//}
+	////////////////////////////////////////////
+	// fgetc 和 fputc 的使用
+	//int c;
+	//while ((c = fgetc(stdin)) != EOF) {
+	//	fputc(c, stdout);
+	//	fputc(c, fp);
+	//}
+	fflush(fp);
+	fclose(fp);
+}
+void test7()
+{
+	typedef struct student {
+		char name[1024];
+		int score;
+	}student;
+	printf("hello\n");
+	fprintf(stdout, "hello\n");
+
+	//能够把一个数据进行格式化，然后放到一个字符串中
+	//这个操作就是把一个整数，转换成一个字符串
+	char buf[1024] = { 0 };
+	sprintf(buf, "%d", 100);
+	printf("%s\n", buf);
+	int num = 0;
+	sscanf(buf, "%d", &num);
+	//解析buf中的内容，以%d的形式放到num中
+	printf("%d\n", num);
+
+	//将一个结构体转换为字符串
+	student stu = { "zhangsan",100 };
+	char buf1[1024] = { 0 };
+	sprintf(buf1, "%s,%d", stu.name, stu.score);
+	printf("%s\n", buf1);
+}
+void test8()
+{
+	char ac[] = {'a','b','c'};
+	ac[0] = 'n';
+	printf("%s \n", &ac);
+	char* p1 = "abc";
+	char* p2 = "abc";
+
+	printf("%p \n", p1);
+	printf("%p \n", p2);
+	*p1 = "vdv";
+	printf("%s \n", p1);
+	printf("%s \n", p2);
+}
+int main()
+{
+	// 1：14：58
+	test8();
+	system("pause");
+	return 0;
+}
