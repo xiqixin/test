@@ -1,161 +1,192 @@
-#include"RSA.h"
-
-
+#include "RSA.h"
+#include <time.h>
+#include <iostream>
+#include <fstream>
+RSA::RSA()
+{
+	produce_keys();
+}
 void RSA::ecrept(const char* plain_file_in, const char* ecrept_file_out,
-	long ekey, long pkey)
+	bm::int1024_t ekey, bm::int1024_t pkey)//åŠ å¯†
 {
-
+	std::ifstream fin(plain_file_in);
+	std::ofstream fout(ecrept_file_out,std::ofstream::app);
+	if (!fin.is_open())
+	{
+		std::cout << "open file failed 1" << std::endl;
+		return;
+	}
+	const int NUM = 256;
+	char buffer[NUM];
+	bm::int1024_t buffer_out[NUM];
+	int curNum;
+	//æ‰“å¼€æ–‡ä»¶ï¼ŒæŒ‰å—è¯»å–ï¼Œé€æ®µåŠ å¯†
+	while (!fin.eof())
+	{
+		fin.read(buffer, NUM);
+		curNum = fin.gcount();//è¿”å›å½“å‰è¯»äº†å¤šå°‘ä¸ªå­—èŠ‚æ•°
+		for (int i = 0; i < curNum; ++i)
+		{
+			buffer_out[i] = ecrept((bm::int1024_t)buffer[i], ekey, pkey);
+		}
+		fout.write((char*)buffer_out, curNum * sizeof(bm::int1024_t));
+	}
+	fin.close();
+	fout.close();
 }
-
 void RSA::decrept(const char* ecrept_file_in, const char* plain_file_out,
-	long dkey, long pkey)
+	bm::int1024_t dkey, bm::int1024_t pkey)//è§£å¯†
 {
-
+	std::ifstream fin(ecrept_file_in);
+	std::ofstream fout(plain_file_out, std::ofstream::app);
+	if (!fin.is_open())
+	{
+		std::cout << "open file failed 2" << std::endl;
+		return;
+	}
+	const int NUM = 256;
+	bm::int1024_t buffer[NUM];
+	char buffer_out[NUM];
+	int curNum;
+	//æ‰“å¼€æ–‡ä»¶ï¼ŒæŒ‰å—è¯»å–ï¼Œé€æ®µè§£å¯†
+	while (!fin.eof())
+	{
+		fin.read((char*)buffer, NUM*sizeof(bm::int1024_t));
+		curNum = fin.gcount();//è¿”å›å½“å‰è¯»äº†å¤šå°‘ä¸ªå­—èŠ‚æ•°
+		curNum /= sizeof(bm::int1024_t);
+		for (int i = 0; i < curNum; ++i)
+		{
+			buffer_out[i] = (char)ecrept(buffer[i], dkey, pkey);
+		}
+		fout.write(buffer_out, curNum);
+	}
+	fin.close();
+	fout.close();
 }
-
-std::vector<long> RSA::ecrept(std::string& str_in, long ekey, long pkey)//¶Ô×Ö·û´®¼ÓÃÜ
+std::vector<bm::int1024_t> RSA::ecrept(std::string& str_in, bm::int1024_t ekey, bm::int1024_t pkey)
 {
-	std::vector<long> vec_out;
+	//å­—ç¬¦ä¸²åŠ å¯†
+	std::vector<bm::int1024_t> vecout;
 	for (const auto& e : str_in)
 	{
-		vec_out.push_back(ecrept(e, ekey, pkey));//½«¼ÓÃÜµÄĞÅÏ¢·ÅÈëµ½vec_outÖĞ
+		vecout.push_back(ecrept(e, ekey, pkey));
 	}
-	return vec_out;
+	return vecout;
 }
-
-std::string RSA::decrept(std::vector<long>& ecrept_str, long dkey, long pkey)//¶Ô¼ÓÃÜµÄ×Ö·û´®½âÃÜ
+std::string RSA::decrept(std::vector<bm::int1024_t>& ercept_str, bm::int1024_t dkey, bm::int1024_t pkey)
 {
-	std::string str_out;
+	//å­—ç¬¦ä¸²è§£å¯†
+	std::string strout;
+	for (const auto& e: ercept_str)
+	{
+		strout.push_back((char)ecrept(e, dkey, pkey));
+	}
+	return strout;
+}
+void RSA::printInfo(std::vector<bm::int1024_t>& ecrept_str)
+{
 	for (const auto& e : ecrept_str)
 	{
-		str_out.push_back((char)ecrept(e, dkey, pkey));//½«½âÃÜµÄ×Ö·û·ÅÈëµ½str_outÖĞ
+		std::cout << e << "";
 	}
-	return str_out;
+	std::cout << std::endl;
 }
 
-long RSA::ecrept(long msg, long key, long pkey)//¼ÓÃÜ   msg£ºĞèÒª¼ÓÃÜµÄĞÅÏ¢
+//åŠ å¯†å•ä¸ªä¿¡æ¯--æ¨¡å¹‚è¿ç®—
+bm::int1024_t RSA::ecrept(bm::int1024_t msg, bm::int1024_t key, bm::int1024_t pkey)
 {
-	long msg_out = 1;
-	long a = msg;
-	long b = key;
-	int c = pkey;
+	bm::int1024_t msg_out = 1;
+	bm::int1024_t a = msg;
+	bm::int1024_t b = key;
+	bm::int1024_t c = pkey;
 	while (b)
 	{
 		if (b & 1)
-		{
-			msg_out = (msg_out * a) % c;
-		}
-		b >> 1;
-		a = (a * a) % c;
+			//msg_out = (A0*A1*...Ai...An)%c
+			msg_out = (msg_out*a) % c;
+		b >>= 1;
+		//Ai=(A(i-1)*A(i-1))%c
+		a = (a*a) % c;
 	}
 	return msg_out;
 }
-
-long RSA::produce_prime()//²úÉúËØÊı
+bm::int1024_t RSA::produce_prime()//äº§ç”Ÿç´ æ•°
 {
 	srand(time(nullptr));
-	long prime = 0;
+	bm::int1024_t prime = 0;
 	while (1)
 	{
-		prime = rand() % 30 + 2;//²úÉúÒ»¸ö´óÓÚ2µÄËØÊı
+		prime = rand() % 50 + 2;
 		if (is_prime(prime))
-		{
 			break;
-		}
 	}
 	return prime;
 }
-
-bool RSA::is_prime(long prime)//ÅĞ¶ÏÊÇ·ñÎªËØÊı
+bool RSA::is_prime(bm::int1024_t prime)//åˆ¤æ–­æ˜¯å¦ä¸ºç´ æ•°
 {
 	if (prime < 2)
-	{
 		return false;
-	}
-	for(int i = 2; i <= sqrt(prime); i++)
+	for (int i = 2; i <= sqrt(prime); ++i)
 	{
-		if (prime % i == 0)
-		{
+		if (prime%i == 0)
 			return false;
-		}
 	}
 	return true;
 }
-
-void RSA::produce_keys()//´æ·Å¹«Ô¿ÃØÔ¿
+void RSA::produce_keys()//å­˜æ”¾å…¬é’¥å¯†é’¥
 {
-	long prime1 = produce_prime();
-	long prime2 = produce_prime();
+	bm::int1024_t prime1 = produce_prime();
+	bm::int1024_t prime2 = produce_prime();
 	while (prime1 == prime2)
-	{
 		prime2 = produce_prime();
-	}
 
-	_key.pkey = produce_pkey(prime1, prime2);
-	long orla = produce_orla(prime1, prime2);
-	_key.ekey = produce_ekey(orla);
-	_key.dkey = produce_dkey(_key.ekey, orla);
+	_key.pkey = produce_pkey(prime1, prime2);//äº§ç”Ÿ n-->p*q
+	bm::int1024_t orla = produce_orla(prime1, prime2);//äº§ç”Ÿ(p-1)(q-1)
+	_key.ekey = produce_ekey(orla);//äº§ç”Ÿå…¬é’¥
+	_key.dkey = produce_dkey(_key.ekey, orla);//äº§ç”Ÿå¯†é’¥
 }
-
-long RSA::produce_pkey(long prime1, long prime2)//pq->n
+bm::int1024_t RSA::produce_pkey(bm::int1024_t prime1, bm::int1024_t prime2)// n-->p*q
 {
-	return prime1 * prime2;
+	return  prime1 * prime2;
 }
-
-long RSA::produce_orla(long prime1, long prime2)//(p-1)(q-1)
+bm::int1024_t RSA::produce_orla(bm::int1024_t prime1, bm::int1024_t prime2)//(p-1)(q-1)
 {
-	return (prime1 - 1) * (prime2 - 1);
-
+	return (prime1 - 1)*(prime2 - 1);
 }
-
-long RSA::produce_ekey(long orla)//²úÉú¹«Ô¿
+bm::int1024_t RSA::produce_ekey(bm::int1024_t orla)//äº§ç”Ÿå…¬é’¥
 {
-	long ekey;
+	bm::int1024_t ekey;
 	srand(time(nullptr));
 	while (1)
 	{
 		ekey = rand() % orla;
 		if (ekey > 1 && produce_gcd(ekey, orla) == 1)
-		{
 			break;
-		}
 	}
 	return ekey;
-
 }
-
-long RSA::produce_gcd(long ekey, long orla)//¹«Ô¿ÒªºÍoral»¥ÖÊ
+bm::int1024_t RSA::produce_gcd(bm::int1024_t ekey, bm::int1024_t orla)//åˆ¤æ–­æ˜¯å¦äº’è´¨
 {
-	long residual;
+	//gcd(a , b) = gcd(b , a%b)
+	bm::int1024_t residual;
 	while (residual = ekey % orla)
 	{
 		ekey = orla;
-		orla = ekey % orla;
+		orla = residual;
 	}
 	return orla;
 }
-
-long RSA::produce_dkey(long ekey, long orla)//²úÉúÃØÔ¿
+bm::int1024_t RSA::produce_dkey(bm::int1024_t ekey, bm::int1024_t orla)//äº§ç”Ÿå¯†é’¥
 {
-	long dkey = orla / ekey;
+	bm::int1024_t dkey = orla / ekey;
 	while (1)
 	{
 		if ((dkey * ekey) % orla == 1)
-		{
 			break;
-		}
+
 		++dkey;
 	}
 	return dkey;
-}
-
-void RSA::printInfo(std::vector<long>& ecrept_str)
-{
-	for (const auto& e : ecrept_str)
-	{
-		std::cout << e << " ";
-	}
-	std::cout << std::endl;
 }
 
 
