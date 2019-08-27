@@ -1,47 +1,47 @@
 #pragma once
-#include<iostream>
+#include <iostream>
 #include <string>
 #include <vector>
-#include<stdlib.h>
-#include<time.h>
+#include <stdlib.h>
+#include <time.h>
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/random.hpp>
+namespace bm = boost::multiprecision;
 struct Key
 {
-	//¹«Ô¿(ekey, pkey): (e,n)
-	long pkey;
-	long ekey;
-	//Ë½Ô¿(dkey, pkey): (d, n)
-	long dkey;
+	//å…¬é’¥ï¼ˆekey,pkeyï¼‰:(e,n)
+	bm::int1024_t pkey;
+	bm::int1024_t ekey;
+	//ç§é’¥ (dkey,pkey):(d,n)
+	bm::int1024_t dkey;
 };
 
 class RSA
 {
 public:
 	RSA();
-	Key getKey()
+	Key getkey()
 	{
 		return _key;
 	}
 	void ecrept(const char* plain_file_in, const char* ecrept_file_out,
-		long ekey, long pkey);
+		bm::int1024_t ekey, bm::int1024_t pkey);//åŠ å¯†
 	void decrept(const char* ecrept_file_in, const char* plain_file_out,
-		long dkey, long pkey);
-
-	std::vector<long> ecrept(std::string& str_in, long ekey, long pkey);
-	std::string decrept(std::vector<long>& ecrept_str, long dkey, long pkey);
-
-	void printInfo(std::vector<long>& ecrept_str);
+		bm::int1024_t dkey, bm::int1024_t pkey);//è§£å¯†
+	std::vector<bm::int1024_t> ecrept(std::string& str_in, bm::int1024_t ekey, bm::int1024_t pkey);//å­—ç¬¦ä¸²åŠ å¯†
+	std::string decrept(std::vector<bm::int1024_t>& ercept_str, bm::int1024_t dkey, bm::int1024_t pkey);//å­—ç¬¦ä¸²è§£å¯†
+	void printInfo(std::vector<bm::int1024_t>& ecrept_str);
 private:
-	//¼ÓÃÜµ¥¸öĞÅÏ¢
-	long ecrept(long msg, long key, long pkey);//¼ÓÃÜ
-	long produce_prime();//²úÉúËØÊı
-	bool is_prime(long prime);//ÅĞ¶ÏÊÇ·ñÎªËØÊı
-	void produce_keys();//´æ·Å¹«Ô¿ÃØÔ¿
-	long produce_pkey(long prime1, long prime2);//pq->n
-	long produce_orla(long prime1, long prime2);//(p-1)(q-1)
-	long produce_ekey(long orla);//²úÉú¹«Ô¿
-	long produce_gcd(long ekey, long orla);//»¥ÖÊ
-	long produce_dkey(long ekey, long orla);//²úÉúÃØÔ¿
-
+	//åŠ å¯†å•ä¸ªä¿¡æ¯
+	bm::int1024_t ecrept(bm::int1024_t msg, bm::int1024_t key, bm::int1024_t pkey);//åŠ å¯†
+	bm::int1024_t produce_prime();//äº§ç”Ÿç´ æ•°
+	bool is_prime(bm::int1024_t prime);//åˆ¤æ–­æ˜¯å¦ä¸ºç´ æ•°
+	void produce_keys();//å­˜æ”¾å…¬é’¥å¯†é’¥
+	bm::int1024_t produce_pkey(bm::int1024_t prime1, bm::int1024_t prime2);// n-->pq
+	bm::int1024_t produce_orla(bm::int1024_t prime1, bm::int1024_t prime2);//(p-1)(q-1)
+	bm::int1024_t produce_ekey(bm::int1024_t orla);;//äº§ç”Ÿå…¬é’¥
+	bm::int1024_t produce_gcd(bm::int1024_t ekey, bm::int1024_t orla);//äº’è´¨
+	bm::int1024_t produce_dkey(bm::int1024_t ekey, bm::int1024_t orla);//äº§ç”Ÿå¯†é’¥
 private:
 	Key _key;
 };
